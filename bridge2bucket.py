@@ -108,7 +108,7 @@ class BucketData:
         if self.bridge_dict[bridge.hex_key].address != bridge.address:
             self.bridge_dict[bridge.hex_key].address = bridge.address
             self.bridge_dict[bridge.hex_key].status = "NEW"
-        if self.bridge_dict[bridge.hex_key].or_port != bridge.or_port:
+        if int(self.bridge_dict[bridge.hex_key].or_port) != int(bridge.or_port):
             self.bridge_dict[bridge.hex_key].or_port = bridge.or_port
             self.bridge_dict[bridge.hex_key].status = "NEW"
         self.allocated += 1
