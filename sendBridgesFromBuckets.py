@@ -49,18 +49,18 @@ MAIL_FROM = "tor-internal@torproject.org"
 
 # Email text template
 MAIL_TEXT = """
-    Hello,
+Hello,
 
-    here is this week's bulk of unallocated Tor Bridges.
+Here is this week's bulk of unallocated Tor Bridges.
 
-    NEW Bridges since the last email you've got:
-
-%s
-    Bridges still RUNNING since the last email you've got:
+NEW Bridges since the last email I sent you:
 
 %s
-    Have fun,
-    The Bridge Mail Bot
+Bridges still RUNNING since the last email I sent you:
+
+%s
+Have fun,
+The Bridge Mail Bot
     """
 
 class BridgeData:
