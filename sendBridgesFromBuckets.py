@@ -39,8 +39,7 @@ EMAIL_MAPPING = { "PersonA.brdgs": ["foo@bar.org"],
                   "PersonB.brdgs": ["baz@baz.com"] }
 
 # Who's on the default Cc: list?
-DEFAULT_CC = ["Christian Fromme <kaner@strace.org>",
-              "Roger Dingledine <arma@mit.edu>"]
+DEFAULT_CC = ["kaner@strace.org", "arma@freehaven.net"]
 
 # Where are the .brdgs files to be found in?
 BRIDGEDB_RUN_DIR = "/home/bridges/run"
@@ -137,10 +136,11 @@ def sendMail(mailTo, mailBody):
     message['From'] = MAIL_FROM
     message['To'] = ", ".join(mailTo)
     message['Cc'] = ", ".join(DEFAULT_CC)
-
+    
+    toAddrs = mailTo + DEFAULT_CC
     try:
        smtp = smtplib.SMTP("localhost:25")
-       smtp.sendmail(MAIL_FROM, mailTo, message.as_string())
+       smtp.sendmail(MAIL_FROM, toAddrs, message.as_string())
        smtp.quit()
     except smtplib.SMTPException:
        print >>sys.stderr, "Error while trying to send to %s" % mailTo
