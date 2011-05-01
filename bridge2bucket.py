@@ -138,7 +138,7 @@ class BucketData:
                 self.allocated += 1
             f.close()
         except IOError:
-            print >>sys.stderr, "IOError while reading %s", self.file_name
+            print >>sys.stderr, "IOError while reading %s" % self.file_name
         
     def dumpToFile(self):
         """Dump a list of given bridges into a file
