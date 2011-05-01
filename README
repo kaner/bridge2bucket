@@ -1,0 +1,3 @@
+This Python script dumps bridges from the Tor BridgeDB database file into file
+buckets. It is a workaround solution until we have rewritten the BridgeDB
+bucket feature.
