@@ -1,3 +1,10 @@
+This is a collection of scripts that enable its users to send off unallocated
+Tor Bridges to users. Currently, the only way to send Bridges is by email.
+
+The original repository can be found at:
+
+    https://github.com/kaner/bridge2bucket
+
 The Python script bridge2bucket.py dumps bridges from the Tor BridgeDB database
 file into file buckets. It is a workaround solution until we have rewritten the
 BridgeDB bucket feature.

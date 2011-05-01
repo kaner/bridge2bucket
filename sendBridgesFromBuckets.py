@@ -33,10 +33,31 @@ import os
 import sys
 import smtplib
 
+# Map a .brdgs file to a person's email address: Who gets what
 EMAIL_MAPPING = { "PersonA.brdgs": "foo@bar.org",
                   "PersonB.brdgs": "baz@baz.com" }
+
+# Where are the .brdgs files to be found in?
 BRIDGEDB_RUN_DIR = "/home/bridges/run"
+
+# The from field in email we send
 MAIL_FROM = "tor-internal@torproject.org"
+
+# Email text template
+MAIL_TEXT = """
+    Hello,
+
+    here is this week's bulk of unallocated Tor Bridges.
+
+    NEW Bridges since the last email you've got:
+
+%s
+    Bridges still RUNNING since the last email you've got:
+
+%s
+    Have fun,
+    The Bridge Mail Bot
+    """
 
 class BridgeData:
     """Value class carrying bridge information:
@@ -63,31 +84,21 @@ class BridgeData:
         self.status = status
 
 def createMailBody(bridgeDict):
-    """Create the text body for the emails
+    """Create the text body for the emails. This more or less means we dump
+       bridges marked as "NEW" or "RUNNING" into the text template.
     """
-    text = """
-    Hello,
 
-    here is this week's bulk of unallocated Tor Bridges.
-
-    NEW Bridges since the last email you've got:
-
-%s
-    Bridges still RUNNING since the last email you've got:
-
-%s
-    Have fun,
-    The Bridge Mail Bot
-    """
-    new_bridges = "".join("      %s:%s\n" % (b.address, b.or_port) for b in bridgeDict["NEW"])
-    running_bridges = "".join("      %s:%s\n" % (b.address, b.or_port) for b in bridgeDict["RUNNING"])
+    new_bridges = "".join("      %s:%s\n" % (b.address, b.or_port) 
+                            for b in bridgeDict["NEW"])
+    running_bridges = "".join("      %s:%s\n" % (b.address, b.or_port) 
+                            for b in bridgeDict["RUNNING"])
 
     if new_bridges == "":
         new_bridges = "      None\n"
     if running_bridges == "":
         running_bridges = "      None\n"
 
-    return text % (new_bridges, running_bridges)
+    return MAIL_TEXT % (new_bridges, running_bridges)
 
 def readBridgesFromFile(fileName):
     """Read bridges into NEW/RUNNING/OLD dict from file
@@ -99,7 +110,6 @@ def readBridgesFromFile(fileName):
         return bridgeDict
 
     r = re.compile('[ \t\n]+')
-
     try:
         f = open(fileName, 'r')
         for line in f:
@@ -124,6 +134,10 @@ def sendMail(mailTo, mailBody):
        print >>sys.stderr, "Error while trying to send to %s" % mailTo
 
 def main():
+    """Main routine: Look thorugh EMAIL_MAPPING dict and attempt to send off
+       emails according to the configuration.
+    """
+
     for k, v in EMAIL_MAPPING.items():
         bridgeDict = readBridgesFromFile(BRIDGEDB_RUN_DIR + "/" + k)
         sendMail(v, createMailBody(bridgeDict))
