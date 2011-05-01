@@ -1,3 +1,6 @@
-This Python script dumps bridges from the Tor BridgeDB database file into file
-buckets. It is a workaround solution until we have rewritten the BridgeDB
-bucket feature.
+The Python script bridge2bucket.py dumps bridges from the Tor BridgeDB database
+file into file buckets. It is a workaround solution until we have rewritten the
+BridgeDB bucket feature.
+
+The Python script sendBridgesFromBuckets.py reads in a configured number of
+bucket files and sends the bridges out to configured email addresses.
