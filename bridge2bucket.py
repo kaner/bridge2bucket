@@ -33,14 +33,15 @@ import re
 import sys
 import os
 import sqlite3
+from collections import deque
 from datetime import datetime, timedelta
 
 # The name of the file containing the SQLite database
 DATABASE_FILE = "/home/bridges/run/bridgedist.db.sqlite"
 # Bucket definitions
-FILE_BUCKETS = { "PersonA": 10, "PersonB": 15 }
+FILE_BUCKETS = { "PersonA": 75, "PersonB": "*" }
 # How fresh should a bridge be (in days)
-BRIDGE_FRESHNESS = 1 
+BRIDGE_FRESHNESS = 10
 
 class BridgeData:
     """Value class carrying bridge information:
@@ -224,11 +225,12 @@ def main():
 
     dbBridges = filterBridges(getAllBridgesFromDB())
     # Loop through database bridges, merge with (possibly) exisiting ones read 
-    # from file. Looping through database bridges instead of those read from 
-    # file (which would be more intuitive) because we end up more balanced 
-    # that way
+    # from file.
+    dequeBucketList = deque(bucketList)
     for bridge in dbBridges:
-        for bucket in bucketList:
+        # Shift right once
+        dequeBucketList.rotate(1)
+        for bucket in dequeBucketList:
             if bucket.needsBridge():
                 if bridge.hex_key in bucket.bridge_dict.keys():
                     bucket.updateBridge(bridge)
