@@ -51,7 +51,7 @@ MAIL_FROM = "tor-internal@torproject.org"
 MAIL_TEXT = """
 Hello,
 
-Here is today's bulk of unallocated Tor Bridges.
+Here is today's list of private Tor Bridges.
 
 NEW Bridges since the last email I sent you:
 
