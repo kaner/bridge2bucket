@@ -99,8 +99,13 @@ class BucketData:
         """Update an existing bridge
         """
         self.bridge_dict[bridge.hex_key].status = "RUNNING"           
-        self.bridge_dict[bridge.hex_key].address = bridge.address
-        self.bridge_dict[bridge.hex_key].or_port = bridge.or_port
+        # In case the IP address or the OR port changes, set status to "NEW"
+        if self.bridge_dict[bridge.hex_key].address != bridge.address:
+            self.bridge_dict[bridge.hex_key].address = bridge.address
+            self.bridge_dict[bridge.hex_key].status = "NEW"
+        if self.bridge_dict[bridge.hex_key].or_port != bridge.or_port:
+            self.bridge_dict[bridge.hex_key].or_port = bridge.or_port
+            self.bridge_dict[bridge.hex_key].status = "NEW"
         self.allocated += 1
 
     def readFromFile(self):
