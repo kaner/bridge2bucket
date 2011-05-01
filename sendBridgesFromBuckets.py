@@ -51,7 +51,7 @@ MAIL_FROM = "tor-internal@torproject.org"
 MAIL_TEXT = """
 Hello,
 
-Here is this week's bulk of unallocated Tor Bridges.
+Here is today's bulk of unallocated Tor Bridges.
 
 NEW Bridges since the last email I sent you:
 
@@ -132,7 +132,7 @@ def sendMail(mailTo, mailBody):
     """
 
     message = MIMEText(mailBody)
-    message['Subject'] = "Your weekly Tor Bridges"
+    message['Subject'] = "Your daily Tor Bridges"
     message['From'] = MAIL_FROM
     message['To'] = ", ".join(mailTo)
     message['Cc'] = ", ".join(DEFAULT_CC)
