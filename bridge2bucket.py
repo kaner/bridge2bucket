@@ -36,11 +36,11 @@ import sqlite3
 from datetime import datetime, timedelta
 
 # The name of the file containing the SQLite database
-DATABASE_FILE = "bridgedist.db.sqlite"
+DATABASE_FILE = "/home/bridges/run/bridgedist.db.sqlite"
 # Bucket definitions
 FILE_BUCKETS = { "PersonA": 10, "PersonB": 15 }
 # How fresh should a bridge be (in days)
-BRIDGE_FRESHNESS = 10 
+BRIDGE_FRESHNESS = 1 
 
 class BridgeData:
     """Value class carrying bridge information:
