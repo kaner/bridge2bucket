@@ -224,10 +224,10 @@ def main():
     # that way
     for bridge in dbBridges:
         for bucket in bucketList:
-            if bridge.hex_key in bucket.bridge_dict.keys():
-                bucket.updateBridge(bridge)
-            else:
-                if bucket.needsBridge():
+            if bucket.needsBridge():
+                if bridge.hex_key in bucket.bridge_dict.keys():
+                    bucket.updateBridge(bridge)
+                else:
                     bucket.addBridge(bridge)
 
     # Dump buckets to file
