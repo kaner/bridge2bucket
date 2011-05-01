@@ -32,10 +32,15 @@ import re
 import os
 import sys
 import smtplib
+from email.mime.text import MIMEText
 
 # Map a .brdgs file to a person's email address: Who gets what
-EMAIL_MAPPING = { "PersonA.brdgs": "foo@bar.org",
-                  "PersonB.brdgs": "baz@baz.com" }
+EMAIL_MAPPING = { "PersonA.brdgs": ["foo@bar.org"],
+                  "PersonB.brdgs": ["baz@baz.com"] }
+
+# Who's on the default Cc: list?
+DEFAULT_CC = ["Christian Fromme <kaner@strace.org>",
+              "Roger Dingledine <arma@mit.edu>"]
 
 # Where are the .brdgs files to be found in?
 BRIDGEDB_RUN_DIR = "/home/bridges/run"
@@ -101,7 +106,7 @@ def createMailBody(bridgeDict):
     return MAIL_TEXT % (new_bridges, running_bridges)
 
 def readBridgesFromFile(fileName):
-    """Read bridges into NEW/RUNNING/OLD dict from file
+    """Read bridges into NEW/RUNNING/OLD dict from file.
     """
     bridgeDict = { "NEW": [], "RUNNING": [], "OLD": [] }    
     
@@ -126,9 +131,16 @@ def readBridgesFromFile(fileName):
 def sendMail(mailTo, mailBody):
     """Send a text to an address
     """
+
+    message = MIMEText(mailBody)
+    message['Subject'] = "Your weekly Tor Bridges"
+    message['From'] = MAIL_FROM
+    message['To'] = ", ".join(mailTo)
+    message['Cc'] = ", ".join(DEFAULT_CC)
+
     try:
        smtp = smtplib.SMTP("localhost:25")
-       smtp.sendmail(MAIL_FROM, mailTo, mailBody)
+       smtp.sendmail(MAIL_FROM, mailTo, message.as_string())
        smtp.quit()
     except smtplib.SMTPException:
        print >>sys.stderr, "Error while trying to send to %s" % mailTo
@@ -140,7 +152,10 @@ def main():
 
     for k, v in EMAIL_MAPPING.items():
         bridgeDict = readBridgesFromFile(BRIDGEDB_RUN_DIR + "/" + k)
-        sendMail(v, createMailBody(bridgeDict))
+        if len(bridgeDict["RUNNING"]) > 0 or len(bridgeDict["NEW"]) > 0:
+            sendMail(v, createMailBody(bridgeDict))
+        else:
+            print "RUNNING and NEW lists are empty. Not sending anything out."
 
 if __name__ == "__main__":
     main()
