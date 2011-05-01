@@ -95,6 +95,11 @@ class BucketData:
         self.bridge_dict[bridge.hex_key] = bridge
         self.allocated += 1
 
+    def removeBridge(self, bridge):
+        """Remove a bridge from the list
+        """
+        del self.bridge_dict[bridge.hex_key]
+
     def updateBridge(self, bridge):
         """Update an existing bridge
         """
@@ -227,8 +232,18 @@ def main():
             if bucket.needsBridge():
                 if bridge.hex_key in bucket.bridge_dict.keys():
                     bucket.updateBridge(bridge)
+                    break
                 else:
                     bucket.addBridge(bridge)
+                    break
+            else:
+                # If this bridge is part of a certain bucket, remove it from 
+                # that bucket, because if we're here, that bucket wasn't
+                # hungry for any new bridges anymore. Not ideal, because this
+                # is where bridges could move from one bucket to another. But
+                # better than wasting it.
+                if bridge.hex_key in bucket.bridge_dict.keys():
+                    bucket.removeBridge(bridge)
 
     # Dump buckets to file
     for bucket in bucketList:
