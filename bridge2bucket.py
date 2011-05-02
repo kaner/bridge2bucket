@@ -41,7 +41,7 @@ DATABASE_FILE = "/home/bridges/run/bridgedist.db.sqlite"
 # Bucket definitions
 FILE_BUCKETS = { "PersonA": 75, "PersonB": "*" }
 # How fresh should a bridge be (in days)
-BRIDGE_FRESHNESS = 10
+BRIDGE_FRESHNESS = 1
 
 class BridgeData:
     """Value class carrying bridge information:
@@ -56,7 +56,7 @@ class BridgeData:
                       initially is None
     """
     def __init__(self, hex_key, address, or_port, distributor="unallocated",
-                 first_seen="", last_seen="", status="OLD"):
+                 first_seen="", last_seen="", status="OLD", is_free=True):
         self.hex_key = hex_key
         self.address = address
         self.or_port = or_port
@@ -64,6 +64,7 @@ class BridgeData:
         self.first_seen = first_seen
         self.last_seen = last_seen
         self.status = status
+        self.is_free = is_free
 
 class BucketData:
     """Class carrying bucket information and doing bucket file operations:
@@ -87,6 +88,7 @@ class BucketData:
         """Return a Boolean indicating whether or not this bucket still needs
            bridges
         """
+        print "Bucket: %s Got: %d Need: %d" % (self.name, self.allocated, self.needed)
         return self.allocated < self.needed
 
     def addBridge(self, bridge):
@@ -211,6 +213,27 @@ def filterBridges(bridgeList):
             
     return retBridges
 
+def updateBridgeInBucket(bridge, bucketList):
+    """Update a bridge if it is part of the bucket list. Return True. If it is
+       not part of the bucket list or the bucket doesn't need another bridge,
+       return False
+    """
+    for bucket in bucketList:
+        if bridge.hex_key in bucket.bridge_dict.keys():
+            if bucket.needsBridge():
+                bucket.updateBridge(bridge)
+                return True
+            else:
+                # If this bridge is part of a certain bucket, remove it from 
+                # that bucket, because if we're here, that bucket wasn't
+                # hungry for any new bridges anymore. Not ideal, because this
+                # is where bridges could move from one bucket to another. But
+                # better than wasting it.
+                bucket.removeBridge(bridge)
+                break
+
+    return False
+
 def main():
     # Set up bucketList list
     bucketList = []
@@ -224,28 +247,25 @@ def main():
         bucket.resetBridgeState()
 
     dbBridges = filterBridges(getAllBridgesFromDB())
+    # First of all, loop through bridges from the database and see if we need
+    # to update anything (bridges should stay in their buckets if possible)
+    for bridge in dbBridges:
+        if updateBridgeInBucket(bridge, bucketList):
+            bridge.is_free = False
+            continue
     # Loop through database bridges, merge with (possibly) exisiting ones read 
     # from file.
     dequeBucketList = deque(bucketList)
     for bridge in dbBridges:
+        # Skip bridges already assigned
+        if not bridge.is_free:
+            continue
         # Shift right once
         dequeBucketList.rotate(1)
         for bucket in dequeBucketList:
             if bucket.needsBridge():
-                if bridge.hex_key in bucket.bridge_dict.keys():
-                    bucket.updateBridge(bridge)
-                    break
-                else:
-                    bucket.addBridge(bridge)
-                    break
-            else:
-                # If this bridge is part of a certain bucket, remove it from 
-                # that bucket, because if we're here, that bucket wasn't
-                # hungry for any new bridges anymore. Not ideal, because this
-                # is where bridges could move from one bucket to another. But
-                # better than wasting it.
-                if bridge.hex_key in bucket.bridge_dict.keys():
-                    bucket.removeBridge(bridge)
+                bucket.addBridge(bridge)
+                break
 
     # Dump buckets to file
     for bucket in bucketList:
