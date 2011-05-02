@@ -88,7 +88,6 @@ class BucketData:
         """Return a Boolean indicating whether or not this bucket still needs
            bridges
         """
-        print "Bucket: %s Got: %d Need: %d" % (self.name, self.allocated, self.needed)
         return self.allocated < self.needed
 
     def addBridge(self, bridge):
